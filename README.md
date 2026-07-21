@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Графики — медперсонал
 
-## Getting Started
+Локальное веб-приложение для создания и редактирования месячных графиков смен медицинского персонала. Все данные хранятся в `localStorage` браузера — без сервера и синхронизации между устройствами.
 
-First, run the development server:
+## Стек
+
+- Next.js 16 (App Router), React 19, TypeScript
+- Tailwind CSS 4, Biome, React Compiler
+- Zod — валидация данных
+- Bun — тесты и скрипты
+
+## Команды
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun dev                 # dev-сервер http://localhost:3000
+bun run build           # production-сборка
+bun test                # unit и component тесты
+bun run test:watch      # тесты в watch-режиме
+bun run test:e2e        # Playwright e2e
+bun run lint            # biome check
+bun run typecheck:test  # typecheck тестов
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Данные в localStorage
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Ключ | Содержимое |
+|------|------------|
+| `grafik_schedules` | Массив графиков (`Schedule`) |
+| `grafik_employee_lists` | Списки сотрудников для быстрой загрузки |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+График включает: отделение, месяц/год, сотрудников с отпусками и предпочтениями дежурств, требования покрытия, ячейки смен.
 
-## Learn More
+## Быстрый старт
 
-To learn more about Next.js, take a look at the following resources:
+1. **Сотрудники** — создайте список (`/employees`) или используйте встроенный.
+2. **Новый график** (`/schedules/new`) — укажите отделение, период, покрытие, загрузите список.
+3. **Редактирование** — правка ячеек, drag-and-drop смен.
+4. **Настройки** — изменение метаданных и покрытия; синхронизация сотрудников обратно в список.
+5. **Экспорт** — печать, PDF, Excel (с уведомлениями об успехе или ошибке); JSON backup на `/schedules`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Производственный календарь
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Праздники РФ заданы в `lib/holidays/ru.ts` (2025–2028). Для годов вне диапазона учитываются только суббота и воскресенье. Предпраздничные дни сокращают дневную смену на 1 час (7.8 → 6.8).
 
-## Deploy on Vercel
+## Структура
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+app/           — страницы Next.js
+components/    — UI, формы, редактор графика, провайдеры
+lib/           — генератор, календарь, хранилище, валидация (Zod), экспорт
+test/          — preload для bun test
+e2e/           — Playwright e2e
+```
